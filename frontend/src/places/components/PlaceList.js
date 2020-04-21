@@ -8,9 +8,9 @@ function PlaceList(props) {
   if (props.items.length === 0) {
     return (
       <div className="place-list center">
-        <Card>
+        <Card style={{ padding: '1rem' }}>
           <h2>No places found. Maybe create one?</h2>
-          <Button to='/places/new'>SHARE PLACE</Button>
+          <Button to="/places/new">SHARE PLACE</Button>
         </Card>
       </div>
     );
@@ -27,6 +27,7 @@ function PlaceList(props) {
           address={place.address}
           creatorId={place.creator}
           coordinates={place.location}
+          onDelete={props.onDeletePlace}
         />
       ))}
     </ul>

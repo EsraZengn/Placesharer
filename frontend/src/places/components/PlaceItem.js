@@ -1,13 +1,18 @@
 import React, { useState, useContext } from 'react';
+
 import { AuthContext } from '../../shared/context/auth-context';
+import { useHttpClient } from '../../shared/hooks/http-hook';
 import Card from '../../shared/components/UIElements/Card';
 import Button from '../../shared/components/FormElements/Button';
 import Modal from '../../shared/components/UIElements/Modal';
 import Map from '../../shared/components/UIElements/Map';
 import './PlaceItem.css';
+import ErrorModal from '../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 
-function PlaceItem({ id, title, image, description, address, creatorId, coordinates }) {
+function PlaceItem({ id, title, image, description, address, creatorId, coordinates, onDelete }) {
   const auth = useContext(AuthContext);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
   const [showMap, setShowMap] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -17,13 +22,18 @@ function PlaceItem({ id, title, image, description, address, creatorId, coordina
 
   const showDeleteWarningHandler = () => setShowConfirmModal(true);
   const cancelDeleteHandler = () => setShowConfirmModal(false);
-  const confirmDeleteHandler = () => {
+
+  const confirmDeleteHandler = async () => {
     setShowConfirmModal(false);
-    console.log('DELETE');
+    try {
+      await sendRequest(`http://localhost:5000/api/places/${id}`, 'DELETE');
+      onDelete(id);
+    } catch (error) {}
   };
 
   return (
     <>
+      <ErrorModal error={error} onClear={clearError} />
       <Modal
         show={showMap}
         onCancel={closeMapHandler}
@@ -60,6 +70,7 @@ function PlaceItem({ id, title, image, description, address, creatorId, coordina
       </Modal>
       <li className="place-item">
         <Card className="place-item__content">
+          {isLoading && <LoadingSpinner asOverlay />}
           <div className="place-item__image">
             <img src={image} alt={title} />
           </div>
@@ -72,8 +83,8 @@ function PlaceItem({ id, title, image, description, address, creatorId, coordina
             <Button onClick={openMapHandler} inverse>
               VIEW ON MAP
             </Button>
-            {auth.isLoggedIn && <Button to={`/places/${id}`}>EDIT</Button>}
-            {auth.isLoggedIn && (
+            {auth.userId === creatorId && <Button to={`/places/${id}`}>EDIT</Button>}
+            {auth.userId === creatorId && (
               <Button danger onClick={showDeleteWarningHandler}>
                 DELETE
               </Button>
