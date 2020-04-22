@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
+const fs = require('fs');
 const getCoordsForAddress = require('../util/location');
 const HttpError = require('../models/http-error');
 const Place = require('../models/place');
@@ -47,7 +48,7 @@ const createPlace = async (req, res, next) => {
       description,
       address,
       location: coordinates,
-      image: 'https://www.great-towers.com/sites/default/files/2019-07/tower_0.jpg',
+      image: req.file.path,
       creator,
     });
 
@@ -95,6 +96,10 @@ const deletePlace = async (req, res, next) => {
 
   try {
     const place = await Place.findById(placeId).populate('creator');
+    if (!place) {
+      return next(new HttpError('Could not find a place for this id.', 404));
+    }
+    const imagePath = place.image;
 
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -102,6 +107,8 @@ const deletePlace = async (req, res, next) => {
     place.creator.places.pull(place);
     await place.creator.save({ session });
     session.commitTransaction();
+
+    fs.unlink(imagePath, (err) => console.error(err));
 
     res.status(200).json({ message: 'Deleted place' });
   } catch (error) {

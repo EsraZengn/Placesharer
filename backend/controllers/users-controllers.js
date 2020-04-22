@@ -27,8 +27,7 @@ const signup = async (req, res, next) => {
     const createdUser = new User({
       name,
       email,
-      image:
-        'https://cdn.imgbin.com/6/17/15/imgbin-kaname-kuran-vampire-knight-chibi-anime-vampire-in3JX9xrK8nQQws8XDw6JmuGm.jpg',
+      image: req.file.path,
       password,
       places: [],
     });
