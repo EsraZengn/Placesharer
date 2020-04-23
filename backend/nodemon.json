@@ -1,9 +1,0 @@
-{
-  "env": {
-    "DB_USER": "eze",
-    "DB_PASS": "deneme123",
-    "DB_NAME": "mern",
-    "GEOCODE_API_KEY": "732982386421498465585x5706",
-    "JWT_KEY": "nbnxsloirewufskfsbnbbsdajkfrhwerfhejbbendrswhjg"
-  }
-}
