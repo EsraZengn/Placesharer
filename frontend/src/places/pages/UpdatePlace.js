@@ -30,7 +30,14 @@ function UpdatePlace() {
   useEffect(() => {
     const fetchPlace = async () => {
       try {
-        const responseData = await sendRequest(`http://localhost:5000/api/places/${placeId}`);
+        const responseData = await sendRequest(
+          `${process.env.REACT_APP_BACKEND_URL}/places/${placeId}`,
+          'GET',
+          null,
+          {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        );
         setPlace(responseData.place);
         setFormData(
           {
@@ -42,14 +49,13 @@ function UpdatePlace() {
       } catch (error) {}
     };
     fetchPlace();
-  }, [placeId, sendRequest, setFormData]);
+  }, [auth.token, placeId, sendRequest, setFormData]);
 
   const placeUpdateSubmitHandler = async (event) => {
     event.preventDefault();
-    console.log(formState.inputs);
     try {
       await sendRequest(
-        `http://localhost:5000/api/places/${placeId}`,
+        `${process.env.REACT_APP_BACKEND_URL}/places/${placeId}`,
         'PATCH',
         JSON.stringify({
           title: formState.inputs.title.value,
@@ -57,6 +63,7 @@ function UpdatePlace() {
         }),
         {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${auth.token}`,
         },
       );
       history.push(`/${auth.userId}/places`);

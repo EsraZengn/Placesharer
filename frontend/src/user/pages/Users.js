@@ -11,7 +11,7 @@ function Users() {
   useEffect(() => {
     const getUsers = async () => {
       try {
-        const responseData = await sendRequest('http://localhost:5000/api/users');
+        const responseData = await sendRequest(`${process.env.REACT_APP_BACKEND_URL}/users`);
         setUsers(responseData.users);
       } catch (error) {}
     };
@@ -26,7 +26,6 @@ function Users() {
           <LoadingSpinner />
         </div>
       )}
-      {console.log(users)}
       {!isLoading && users && <UsersList items={users} />};
     </>
   );

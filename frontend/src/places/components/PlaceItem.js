@@ -1,14 +1,13 @@
 import React, { useState, useContext } from 'react';
-
 import { AuthContext } from '../../shared/context/auth-context';
 import { useHttpClient } from '../../shared/hooks/http-hook';
 import Card from '../../shared/components/UIElements/Card';
 import Button from '../../shared/components/FormElements/Button';
 import Modal from '../../shared/components/UIElements/Modal';
 import Map from '../../shared/components/UIElements/Map';
-import './PlaceItem.css';
 import ErrorModal from '../../shared/components/UIElements/ErrorModal';
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
+import './PlaceItem.css';
 
 function PlaceItem({ id, title, image, description, address, creatorId, coordinates, onDelete }) {
   const auth = useContext(AuthContext);
@@ -26,7 +25,9 @@ function PlaceItem({ id, title, image, description, address, creatorId, coordina
   const confirmDeleteHandler = async () => {
     setShowConfirmModal(false);
     try {
-      await sendRequest(`http://localhost:5000/api/places/${id}`, 'DELETE');
+      await sendRequest(`${process.env.REACT_APP_BACKEND_URL}/places/${id}`, 'DELETE', null, {
+        Authorization: `Bearer ${auth.token}`,
+      });
       onDelete(id);
     } catch (error) {}
   };
@@ -72,7 +73,7 @@ function PlaceItem({ id, title, image, description, address, creatorId, coordina
         <Card className="place-item__content">
           {isLoading && <LoadingSpinner asOverlay />}
           <div className="place-item__image">
-            <img src={`http://localhost:5000/${image}`} alt={title} />
+            <img src={`${process.env.REACT_APP_ASSET_URL}/${image}`} alt={title} />
           </div>
           <div className="place-item__info">
             <h2>{title}</h2>
