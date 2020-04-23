@@ -9,6 +9,7 @@ const {
   deletePlace,
 } = require('../controllers/places-controllers');
 
+const checkAuth = require('../middleware/check-auth');
 const fileUpload = require('../middleware/file-upload');
 
 const router = express.Router();
@@ -16,6 +17,8 @@ const router = express.Router();
 router.get('/:pid', getPlaceById);
 
 router.get('/user/:uid', getPlacesByUserId);
+
+router.use(checkAuth);
 
 router.post(
   '/',

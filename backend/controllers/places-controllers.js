@@ -39,20 +39,21 @@ const createPlace = async (req, res, next) => {
     return next(new HttpError('Invalid input(s) passed, please check your data.', 422));
   }
 
-  const { title, description, address, creator } = req.body;
+  const { title, description, address } = req.body;
 
   try {
     const coordinates = await getCoordsForAddress(address);
+
     const createdPlace = new Place({
       title,
       description,
       address,
       location: coordinates,
       image: req.file.path,
-      creator,
+      creator: req.userData.userId,
     });
 
-    const user = await User.findById(creator);
+    const user = await User.findById(req.userData.userId);
     if (!user) {
       return next(new HttpError('Could not find user for provided id', 404));
     }
@@ -80,12 +81,18 @@ const updatePlace = async (req, res, next) => {
   const { title, description } = req.body;
 
   try {
-    const updatedPlace = await Place.findOneAndUpdate(
-      { _id: placeId },
-      { title, description },
-      { new: true },
-    );
-    res.status(200).json({ place: updatedPlace.toObject({ getters: true }) });
+    const place = await Place.findById(placeId);
+
+    if (place.creator.toString() !== req.userData.userId) {
+      return next(new HttpError('You are not allowed to edit this place.', 401));
+    }
+
+    place.title = title;
+    place.description = description;
+
+    await place.save();
+
+    res.status(200).json({ place: place.toObject({ getters: true }) });
   } catch (error) {
     return next(new HttpError('Something went wrong, could not update place.', 500));
   }
@@ -99,6 +106,11 @@ const deletePlace = async (req, res, next) => {
     if (!place) {
       return next(new HttpError('Could not find a place for this id.', 404));
     }
+
+    if (place.creator.id !== req.userData.userId) {
+      return next(new HttpError('You are not allowed to delete this place.', 401));
+    }
+
     const imagePath = place.image;
 
     const session = await mongoose.startSession();
