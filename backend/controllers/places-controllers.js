@@ -63,7 +63,7 @@ const createPlace = async (req, res, next) => {
     await createdPlace.save({ session });
     user.places.push(createdPlace);
     await user.save({ session });
-    session.commitTransaction();
+    await session.commitTransaction();
 
     res.status(201).json({ place: createdPlace });
   } catch (error) {
@@ -118,7 +118,7 @@ const deletePlace = async (req, res, next) => {
     await place.remove({ session });
     place.creator.places.pull(place);
     await place.creator.save({ session });
-    session.commitTransaction();
+    await session.commitTransaction();
 
     fs.unlink(imagePath, (err) => console.error(err));
 
